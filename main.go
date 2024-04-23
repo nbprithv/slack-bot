@@ -71,6 +71,11 @@ func main() {
 						// Replace with actual err handeling
 						log.Fatal(err)
 					}
+				case socketmode.EventTypeSlashCommand:
+					err := HandleSlashCommandEvent(event, client)
+					if err != nil {
+						return
+					}
 				}
 			}
 		}
@@ -79,8 +84,23 @@ func main() {
 	socket.Run()
 }
 
+func HandleSlashCommandEvent(event socketmode.Event, client *slack.Client) error {
+	log.Print("-------------------------------------------------------")
+	log.Printf("Event type is %s", strings.ToLower(string(event.Type)))
+	log.Print("-------------------------------------------------------")
+
+	data := event.Data.(slack.SlashCommand)
+	_, _, err := client.PostMessage(data.ChannelID, slack.MsgOptionText(fmt.Sprintf("Hi, I'm Test Bot I got your command."), false))
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
 // HandleEventMessage will take an event and handle it properly based on the type of event
 func HandleEventMessage(event slackevents.EventsAPIEvent, client *slack.Client) error {
+
 	switch event.Type {
 	// First we check if this is an CallbackEvent
 	case slackevents.CallbackEvent:
